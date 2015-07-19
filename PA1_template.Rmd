@@ -27,6 +27,8 @@ library(dplyr)
 ```
 
 1. Calculate the total number of steps taken per day.
+
+I used dplyr's summarize function to group and add the steps by day.
 ```{r,echo=TRUE}
 by_date <- group_by(data,date)
 sums <- summarize(by_date,stepsum=sum(steps))
@@ -106,8 +108,32 @@ median(sums$stepsum, na.rm=TRUE)
 So we can see that using this method did not change the mean, however it did slighty change our median (which is now equal to our mean).  Replacing the missing values largely just made our histogram taller (though it retained its basic distribution/shape).
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+1. Create a new factor variable in the dataset with two levels--'weekday' and 'weekend' indicating whether a given days is a weeday or weekend day.
+
+I'm going to create a true/false variable indicating whether or not a given variable is a weekend day or not (using libridate's wday function to make dates easier to work with).
+
 ```{r,echo=TRUE}
 library(lubridate)
+data$day <- wday(data$date)
+data$weekend <- data$day == 1|data$day==7
 ```
 
-1. 
+2. Make a panel plot containing a time series plot of the 5-minute interval and the average number of steps taken.
+
+```{r,echo=TRUE}
+library(ggplot2)
+by_interval <- group_by(data,interval,weekend)
+means <- summarize(by_interval,average=mean(steps,na.rm=TRUE))
+```
+
+
+
+```{r,echo=TRUE}
+qplot(data=means,interval,average,geom='line')+facet_grid(weekend~.)+labs(y='Average Steps',title='Average Steps by Interval:Weekday vs. Weekend')
+```
+
+**Note: FALSE indicates weekday and TRUE indicates a weekend day.**
+
+So we can see that there is definitely a measureable difference between weekdays and weekend days in terms of which intervals have the most activity.
